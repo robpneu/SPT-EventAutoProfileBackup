@@ -1,3 +1,4 @@
+using EventAutoProfileBackup.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Spt.Mod;
@@ -28,9 +29,8 @@ public class EventAutoProfileBackup(
     ModMetadata modMetadata,
     ProfileService profileService,
     ModConfigService modConfigService
-    ) : IOnLoad
+) : IOnLoad
 {
-
     public async Task OnLoad()
     {
         if (!modConfigService.GetConfig().Enabled)
@@ -43,7 +43,7 @@ public class EventAutoProfileBackup(
         // Restore any requested profiles
         profileService.CreateDirectories();
         await profileService.RestoreRequestedProfilesAsync();
-        
+
         logger.Success($"[{modMetadata.Name}] mod loaded successfully.");
     }
 }

@@ -1,9 +1,10 @@
 using System.Reflection;
+using EventAutoProfileBackup.Models;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Utils;
 
-namespace EventAutoProfileBackup;
+namespace EventAutoProfileBackup.Services;
 
 // Service to easily access the mod configuration. Loads the config on initialization.
 [Injectable(InjectionType.Singleton)]

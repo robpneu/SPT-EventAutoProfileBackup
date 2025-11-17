@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace EventAutoProfileBackup;
+namespace EventAutoProfileBackup.Models;
 
 // Model of the mod configuration
 public record AutoProfileBackupConfig

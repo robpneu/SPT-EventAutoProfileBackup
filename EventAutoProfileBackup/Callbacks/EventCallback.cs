@@ -1,11 +1,12 @@
+using EventAutoProfileBackup.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Utils;
 
-namespace EventAutoProfileBackup;
+namespace EventAutoProfileBackup.Callbacks;
 
 [Injectable]
-public class EventCallback (ISptLogger<EventAutoProfileBackup> logger, ProfileService profileService)
+public class EventCallback(ISptLogger<EventAutoProfileBackup> logger, ProfileService profileService)
 {
     public ValueTask<string> OnEvent(string eventName, MongoId sessionId, string? output)
     {

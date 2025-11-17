@@ -6,7 +6,7 @@ using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
 
-namespace EventAutoProfileBackup;
+namespace EventAutoProfileBackup.Services;
 
 [Injectable]
 public class ProfileService(
@@ -21,7 +21,9 @@ public class ProfileService(
 )
 {
     private readonly string _backupPath = Path.Combine(modConfigService.GetConfig().Directory, "Backups");
+
     private readonly string _profilesToRestorePath = Path.Combine(modConfigService.GetConfig().Directory, "ProfilesToRestore");
+
     private readonly string _restoredProfilesPath = Path.Combine(modConfigService.GetConfig().Directory, "RestoredProfiles");
 
     /// <summary>
@@ -34,7 +36,7 @@ public class ProfileService(
         Directory.CreateDirectory(_profilesToRestorePath);
         Directory.CreateDirectory(_restoredProfilesPath);
     }
-    
+
     /// <summary>
     ///     Backs up the profile for the given session ID.
     /// </summary>
@@ -78,7 +80,7 @@ public class ProfileService(
         await fileUtil.WriteFileAsync(
             Path.Combine(userBackupPath, backupFileName),
             profileJson);
-        
+
         if (autoProfileBackupConfig.BackupSavedLog)
         {
             logger.Success($"[{modMetadata.Name}] Backed up profile for user: {profileUsername} to {Path.Combine(userBackupPath, backupFileName)}");
@@ -133,7 +135,7 @@ public class ProfileService(
         var autoProfileBackupConfig = modConfigService.GetConfig();
         var profileFilePath = Path.Combine(_profilesToRestorePath, profileFile);
         logger.Info($"[{modMetadata.Name}] Restoring {profileFilePath}");
-        
+
         // Manually read the profile JSON file and deserialize it to a SptProfile object
         SptProfile? profile = await jsonUtil.DeserializeFromFileAsync<SptProfile>(profileFilePath);
 
@@ -143,6 +145,7 @@ public class ProfileService(
             logger.Warning($"[{modMetadata.Name}] Profile or Profile ID is null/invalid for file: {profileFile}");
             return; // Stop processing this profile if profile or ID is null
         }
+
         var profileUsername = profile.ProfileInfo.Username;
 
         // If a profile with the same id exists in the SaveServer, we need to delete it first
@@ -152,7 +155,7 @@ public class ProfileService(
             saveServer.DeleteProfileById(profileId); // Removes the profile from the SaveServer
             saveServer.RemoveProfile(profileId); // Removes the profile JSON file from user/profiles
         }
-        
+
         // Add the profile to the SaveServer
         saveServer.AddProfile(profile); // Adds the profile to the SaveServer's in-memory collection.
 
@@ -163,13 +166,13 @@ public class ProfileService(
         // Move the restored profile file to the RestoredProfiles folder
         fileUtil.CopyFile(profileFilePath, Path.Combine(_restoredProfilesPath, profileFile));
         fileUtil.DeleteFile(profileFilePath);
-        logger.Debug($"[{modMetadata.Name}] Moved restored profile file to RestoredProfiles folder."); 
+        logger.Debug($"[{modMetadata.Name}] Moved restored profile file to RestoredProfiles folder.");
 
         // Clean up the RestoredProfiles folder if necessary
         if (autoProfileBackupConfig.MaximumRestoredFiles >= 0)
         {
             var deletedFilesCount = CleanUpFolder(_restoredProfilesPath, autoProfileBackupConfig.MaximumRestoredFiles);
-            
+
             if (autoProfileBackupConfig.MaximumRestoredDeleteLog && deletedFilesCount > 0)
             {
                 logger.Info($"[{modMetadata.Name}] Maximum restored profiles reached. Deleted {deletedFilesCount} old restored profile files");
@@ -223,6 +226,7 @@ public class ProfileService(
                 return deletedFilesCount;
             }
         }
+
         return deletedFilesCount;
     }
 
