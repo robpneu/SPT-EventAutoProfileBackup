@@ -1,85 +1,49 @@
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Utils;
-using System.Reflection;
 
 namespace EventAutoProfileBackup;
+
+[Injectable] // Injectable to be used as-needed by other classes
+public record ModMetadata : AbstractModMetadata
+{
+    public override string ModGuid { get; init; } = "com.friedengineer.eventautoprofilebackup";
+    public override string Name { get; init; } = "EventAutoProfileBackup";
+    public override string Author { get; init; } = "FriedEngineer";
+    public override List<string>? Contributors { get; init; }
+    public override SemanticVersioning.Version Version { get; init; } = new("1.9.0");
+    public override SemanticVersioning.Range SptVersion { get; init; } = new("~4.0.0");
+    public override List<string>? Incompatibilities { get; init; }
+    public override Dictionary<string, SemanticVersioning.Range>? ModDependencies { get; init; }
+    public override string? Url { get; init; } = "https://github.com/robpneu/SPT-EventAutoProfileBackup";
+    public override bool? IsBundleMod { get; init; } = false;
+    public override string? License { get; init; } = "CC-BY-NC-SA-4.0";
+}
 
 // Load just before the PostSptModLoader as that would be just after all the callbacks are loaded
 [Injectable(TypePriority = OnLoadOrder.PostSptModLoader - 1)]
 public class EventAutoProfileBackup(
     ISptLogger<EventAutoProfileBackup> logger,
-    EventAutoProfileBackupMetadata modMetadata,
+    ModMetadata modMetadata,
     ProfileService profileService,
-    EventCallback eventCallbacks,
-    ModHelper modHelper,
-    JsonUtil jsonUtil
+    ModConfigService modConfigService
     ) : IOnLoad
 {
-    private AutoProfileBackupConfig Config { get; set; } = new();
-    private List<EventStaticRouter> eventStaticRouters { get; set; } = new();
 
     public async Task OnLoad()
     {
-        var pathToMod = modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly());
-        logger.Debug($"[{modMetadata.Name}] pathToMod: {pathToMod}");
-
-        var pathToConfig = Path.Combine(pathToMod, "config.jsonc");
-        logger.Debug($"[{modMetadata.Name}] pathToConfig: {pathToConfig}");
-
-        // Get and deserialize the config.jsonc file from the assets folder
-        Config = await jsonUtil.DeserializeFromFileAsync<AutoProfileBackupConfig>(pathToConfig) ?? new();
-
-        if (!Config.Enabled)
+        if (!modConfigService.GetConfig().Enabled)
         {
-            // If the mod is not enabled, we log a message and return
+            // If the mod is not enabled, log a warning message and return
             logger.Warning($"[{modMetadata.Name}] EventAutoProfileBackup mod is disabled. Backups will not be made.");
             return;
         }
 
-        // If the mod is enabled, we log a message
-        logger.Success($"[{modMetadata.Name}] Mod is enabled. Loading...");
-
-        RegisterRoutes();
-
-        // Initialize the ProfileRestoreService and restore any requested profiles
-        profileService.Initialize();
-        await profileService.RestoreRequestedProfiles();
-
+        // Restore any requested profiles
+        profileService.CreateDirectories();
+        await profileService.RestoreRequestedProfilesAsync();
+        
         logger.Success($"[{modMetadata.Name}] mod loaded successfully.");
-    }
-
-    /// <summary>
-    /// This method registers a new route for each AutoBackupEvent in the configuration.
-    /// </summary>
-    private void RegisterRoutes()
-    {
-        // Iterate over the AutoBackupEvents from the config and register a new RouteAction for each event
-        if (Config.AutoBackupEvents is null || Config.AutoBackupEvents.Count() == 0)
-        {
-            // If there are no AutoBackupEvents, we log a message and return
-            logger.Warning($"[{modMetadata.Name}] No AutoBackupEvents found in the configuration.");
-            return;
-        }
-        else
-        {
-            // If there are AutoBackupEvents, we log a message
-            logger.Debug($"[{modMetadata.Name}] Found {Config.AutoBackupEvents.Count()} AutoBackupEvents in the configuration.");
-
-            foreach (var autoBackupEvent in Config.AutoBackupEvents)
-            {
-                eventStaticRouters.Add(new EventStaticRouter(
-                    eventCallbacks,
-                    jsonUtil,
-                    autoBackupEvent.Name,
-                    autoBackupEvent.Route
-                ));
-                logger.Info($"[{modMetadata.Name}] Registered AutoBackupEvent: {autoBackupEvent.Name} on route: {autoBackupEvent.Route}");
-            }
-
-            logger.Success($"[{modMetadata.Name}] Registered {Config.AutoBackupEvents.Count()} AutoBackupEvent(s).");
-        }
     }
 }

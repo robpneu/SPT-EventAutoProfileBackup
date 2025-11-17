@@ -25,9 +25,7 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')" />
-  </ItemGroup>
+  <Import Project="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')" />
 
   <PropertyGroup>
     <ModsDirectoryPath>$(SPTPath)\user\mods\$(MSBuildProjectName)</ModsDirectoryPath>
@@ -38,6 +36,7 @@
     <ItemGroup>
       <FilesToCopy Include="$(OutputPath)$(TargetName)$(TargetExt)" />
       <FilesToCopy Include="$(OutputPath)$(TargetName).pdb" />
+      <FilesToCopy Include="$(OutputPath)config.jsonc" />
     </ItemGroup>
     <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(ModsDirectoryPath)" ContinueOnError="false" />
     <Message Text="Files copied" />

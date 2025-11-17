@@ -1,0 +1,27 @@
+using System.Reflection;
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Utils;
+
+namespace EventAutoProfileBackup;
+
+// Service to easily access the mod configuration. Loads the config on initialization.
+[Injectable(InjectionType.Singleton)]
+public class ModConfigService
+{
+    private AutoProfileBackupConfig _config;
+
+    public ModConfigService(ModHelper modHelper, JsonUtil jsonUtil)
+    {
+        var pathToMod = modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly());
+        var pathToConfig = Path.Combine(pathToMod, "config.jsonc");
+
+        // Get and deserialize the config.jsonc file from the path
+        _config = jsonUtil.DeserializeFromFile<AutoProfileBackupConfig>(pathToConfig) ?? new AutoProfileBackupConfig();
+    }
+
+    public AutoProfileBackupConfig GetConfig()
+    {
+        return _config;
+    }
+}
