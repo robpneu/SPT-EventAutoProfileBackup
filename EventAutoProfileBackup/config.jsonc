@@ -13,11 +13,13 @@
     "MaximumRestoredDeleteLog": false,
     "MaximumRestoredFiles": 10,
 
+    "Directory": "./user/profiles/AutoProfileBackups",
+
     // Which events should trigger a backup
     "AutoBackupEvents": [
-        { "Enabled": true, "Name": "OnGameStart", "Route": "/client/game/start" },
-        { "Enabled": true, "Name": "OnRaidStart", "Route": "/client/match/local/start" },
-        { "Enabled": true, "Name": "OnRaidEnd", "Route": "/client/match/local/end" },
-        { "Enabled": true, "Name": "OnLogout", "Route": "/client/game/logout" }
+        { "Name": "GameLaunch", "Route": "/client/game/start" },
+        { "Name": "RaidStart", "Route": "/client/match/local/start" },
+        { "Name": "RaidEnd", "Route": "/client/match/local/end" },
+        { "Name": "GameClose", "Route": "/client/game/logout" }
     ]
 }
