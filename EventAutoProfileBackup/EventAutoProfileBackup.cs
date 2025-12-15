@@ -19,10 +19,10 @@ public record ModMetadata : AbstractModMetadata
     public override Dictionary<string, SemanticVersioning.Range>? ModDependencies { get; init; }
     public override string? Url { get; init; } = "https://github.com/robpneu/SPT-EventAutoProfileBackup";
     public override bool? IsBundleMod { get; init; } = false;
-    public override string? License { get; init; } = "CC-BY-NC-SA-4.0";
+    public override string License { get; init; } = "CC-BY-NC-SA-4.0";
 }
 
-// Load just before the PostSptModLoader as that would be just after all the callbacks are loaded
+// Load just before the PostSptModLoader as that would be just after all callbacks are loaded
 [Injectable(TypePriority = OnLoadOrder.PostSptModLoader - 1)]
 public class EventAutoProfileBackup(
     ISptLogger<EventAutoProfileBackup> logger,
@@ -40,10 +40,11 @@ public class EventAutoProfileBackup(
             return;
         }
 
-        // Restore any requested profiles
+        // Create necessary directories for backups
         profileService.CreateDirectories();
-        await profileService.RestoreRequestedProfilesAsync();
-
         logger.Success($"[{modMetadata.Name}] mod loaded successfully.");
+        
+        // Restore any requested profiles
+        await profileService.RestoreRequestedProfilesAsync();
     }
 }

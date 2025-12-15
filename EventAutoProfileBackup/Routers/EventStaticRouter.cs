@@ -27,14 +27,15 @@ public class EventStaticRouter(
         EventCallback eventCallbacks, ModMetadata modMetadata, ModConfigService modConfigService)
     {
         AutoProfileBackupConfig config = modConfigService.GetConfig();
+        List<RouteAction> routes = [];
 
         if (!config.Enabled)
         {
-            // If the mod is not enabled,just return an empty list of routes. A warning is logged by the EventAutoProfileBackup class.
-            return new List<RouteAction>();
+            // if the mod is not enabled, no routes should be registered so just return the empty list of routes. 
+            // A warning is logged by the EventAutoProfileBackup class so we don't need to here.
+            return routes;
         }
 
-        List<RouteAction> routes = new List<RouteAction>();
         foreach (var autoBackupEvent in config.AutoBackupEvents)
         {
             routes.Add(
@@ -44,7 +45,7 @@ public class EventStaticRouter(
                         => await eventCallbacks.OnEvent(autoBackupEvent.Name, sessionId, output)
                 )
             );
-            logger.Info($"[{modMetadata.Name}] Registered AutoBackupEvent: {autoBackupEvent.Name} on route: {autoBackupEvent.Route}");
+            logger.Success($"[{modMetadata.Name}] Registered AutoBackupEvent: {autoBackupEvent.Name} on route: {autoBackupEvent.Route}");
         }
 
         return routes;

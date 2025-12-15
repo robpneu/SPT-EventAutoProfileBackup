@@ -89,14 +89,13 @@ public class ProfileService(
         // Cleanup old backups if there are more than MaximumBackupPerProfile
         if (autoProfileBackupConfig.MaximumBackupPerProfile >= 0)
         {
-            var deletedFilesCount = CleanUpFolder(
-                userBackupPath,
-                autoProfileBackupConfig.MaximumBackupPerProfile);
+            var deletedFilesCount = CleanUpFolder(userBackupPath, autoProfileBackupConfig.MaximumBackupPerProfile);
+
             if (autoProfileBackupConfig.MaximumBackupDeleteLog && deletedFilesCount > 0)
             {
                 logger.Info($"[{modMetadata.Name}] Maximum backups for user: {profileUsername} reached. Deleted {deletedFilesCount} old backup files");
             }
-            else
+            else if (deletedFilesCount == 0)
             {
                 logger.Debug($"[{modMetadata.Name}] No cleanup needed for user: {profileUsername}. Current backups are within the limit.");
             }
@@ -115,35 +114,35 @@ public class ProfileService(
         // Get all the JSON files in the ProfilesToRestore folder
         var profileFiles = fileUtil
             .GetFiles(_profilesToRestorePath)
-            .Where(item => fileUtil.GetFileExtension(item).Equals(".json"));
+            .Where(item => fileUtil.GetFileExtension(item).Equals("json"));
 
         // Iterate over the profile files to restore
-        foreach (var profileFile in profileFiles)
+        foreach (var profileFilePath in profileFiles)
         {
-            await RestoreProfileAsync(profileFile);
+            await RestoreProfileAsync(profileFilePath);
         }
     }
 
     /// <summary>
-    ///     Restores a single profile from the given JsonObject.
+    ///     Restores a single profile from a JSON file.
     ///     Roughly copied from the SPT SaveServer load and loadProfiles methods
     /// </summary>
-    /// <param name="profileFile">The profile file to restore.</param>
+    /// <param name="profileFilePath">The profile file path to restore.</param>
     /// <returns>A Task representing the asynchronous operation.</returns>
-    private async Task RestoreProfileAsync(string profileFile)
+    private async Task RestoreProfileAsync(string profileFilePath)
     {
         var autoProfileBackupConfig = modConfigService.GetConfig();
-        var profileFilePath = Path.Combine(_profilesToRestorePath, profileFile);
-        logger.Info($"[{modMetadata.Name}] Restoring {profileFilePath}");
+        var profileFile = fileUtil.GetFileNameAndExtension(profileFilePath);
+        logger.Info($"[{modMetadata.Name}] Restoring {profileFile}");
 
         // Manually read the profile JSON file and deserialize it to a SptProfile object
         SptProfile? profile = await jsonUtil.DeserializeFromFileAsync<SptProfile>(profileFilePath);
 
         // Ensure the profile is not null and profile ID in not null and a valid MongoId
-        if (profile is null || profile.ProfileInfo?.ProfileId is not MongoId profileId)
+        if (profile?.ProfileInfo?.ProfileId is not MongoId profileId)
         {
             logger.Warning($"[{modMetadata.Name}] Profile or Profile ID is null/invalid for file: {profileFile}");
-            return; // Stop processing this profile if profile or ID is null
+            return; // Stop processing this file if the profile is null and/or profileId is invalid.
         }
 
         var profileUsername = profile.ProfileInfo.Username;
@@ -163,8 +162,8 @@ public class ProfileService(
         await saveServer.SaveProfileAsync(profileId);
         logger.Success($"[{modMetadata.Name}] Restored {profileFile} for user: {profileUsername} with ID: {profileId}");
 
-        // Move the restored profile file to the RestoredProfiles folder
-        fileUtil.CopyFile(profileFilePath, Path.Combine(_restoredProfilesPath, profileFile));
+        // Move the restored profile file to the RestoredProfiles folder. Will overwrite if a file with the same name exists.
+        fileUtil.CopyFile(profileFilePath, Path.Combine(_restoredProfilesPath, profileFile), overwrite:true);
         fileUtil.DeleteFile(profileFilePath);
         logger.Debug($"[{modMetadata.Name}] Moved restored profile file to RestoredProfiles folder.");
 
@@ -177,14 +176,14 @@ public class ProfileService(
             {
                 logger.Info($"[{modMetadata.Name}] Maximum restored profiles reached. Deleted {deletedFilesCount} old restored profile files");
             }
-            else
+            else if (deletedFilesCount == 0)
             {
                 logger.Debug($"[{modMetadata.Name}] No cleanup needed for RestoredProfiles folder. Current restored profiles are within the limit.");
             }
         }
         else
         {
-            logger.Warning($"[{modMetadata.Name}] MaximumRestoredProfilesKeep is set to 0. This may cause the folder to grow indefinitely and is not recommended");
+            logger.Warning($"[{modMetadata.Name}] MaximumRestoredProfilesKeep is set to {autoProfileBackupConfig.MaximumRestoredFiles}. This may cause the folder to grow indefinitely and is not recommended");
         }
     }
 
@@ -201,13 +200,14 @@ public class ProfileService(
         logger.Debug($"[{modMetadata.Name}] Cleaning up folder: {folderPath} to keep only {maxFilesToKeep} files.");
 
         // Get the JSON files in the folder and sort them by name, which begins with the timestamp
-        var files = fileUtil.GetFiles(folderPath).Where(item => fileUtil.GetFileExtension(item).Equals(".json"))
+        var files = fileUtil.GetFiles(folderPath).Where(item => fileUtil.GetFileExtension(item).Equals("json"))
             .Select(file => new FileInfo(file))
             .OrderByDescending(file => file.Name)
             .ToList();
         logger.Debug($"[{modMetadata.Name}] Found {files.Count} files in the folder.");
 
-        var deletedFilesCount = 0;
+        var deletedFilesCount = 0; // Counter for deleted files
+
         // If there are more files than the maxFilesToKeep, delete the oldest files until we reach the limit
         while (files.Count > maxFilesToKeep)
         {

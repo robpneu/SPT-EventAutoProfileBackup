@@ -6,11 +6,11 @@ using SPTarkov.Server.Core.Utils;
 
 namespace EventAutoProfileBackup.Services;
 
-// Service to easily access the mod configuration. Loads the config on initialization.
-[Injectable(InjectionType.Singleton)]
+// Service to easily access the mod configuration. Loads the config file on initialization.
+[Injectable(InjectionType.Singleton)] // Singleton as the config should only be loaded once.
 public class ModConfigService
 {
-    private AutoProfileBackupConfig _config;
+    private readonly AutoProfileBackupConfig _config;
 
     public ModConfigService(ModHelper modHelper, JsonUtil jsonUtil)
     {
