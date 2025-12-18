@@ -10,7 +10,7 @@ After installation this will automatically begin to backup each profile individu
 
 ### Backup files
 The backup files are stored as follows
-- Path: `user/profiles/EventAutoBackup/backups/profileUsername-profileID/`
+- Path: `user/profiles/EventAutoBackup/backups/profileID-profileUsername/`
 - File format: `year-month-day_hour-minute-second_​event.json`
   - Example: `2025-01-14_21-14-49_GameLaunch.json`
 
@@ -80,6 +80,9 @@ This project is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/lic
 
 ### Credits
 
-Project    | License
----------- | ----------
-SPT.Server | [NCSA](https://github.com/sp-tarkov/server-csharp/blob/main/LICENSE)
+This directly depends on and borrows various bits of code from SPT.Server. I also referenced the Fika-Server C# for insight and ideas but it is not in any way a dependency, I just want to make sure I credit them for what I got from it.
+
+Project     | License
+----------  | ----------
+SPT.Server  | [NCSA](https://github.com/sp-tarkov/server-csharp/blob/main/LICENSE)
+Fika Server | [NCSA](https://github.com/project-fika/Fika-Server-CSharp/blob/main/LICENSE.md)
