@@ -10,7 +10,7 @@ After installation this will automatically begin to backup each profile individu
 
 ### Backup files
 The backup files are stored as follows
-- Path: `user/profiles/EventProfileBackups/backups/profileID-profileUsername/`
+- Path: `SPT/user/profiles/EventProfileBackups/backups/profileID-profileUsername/`
 - File format: `year-month-day_hour-minute-second_​event.json`
   - Example: `2025-01-14_21-14-49_GameLaunch.json`
 
@@ -18,13 +18,13 @@ The backup files are stored as follows
 Automatically and safely restores profile backups by just placing the desired backup file in the `ProfilesToRestore` folder.
 
 #### Process
-- Copy or move the backup file you wish to restore to `user/profiles/EventProfileBackups/ProfilesToRestore/`.
+- Copy or move the backup file you wish to restore to `SPT/user/profiles/EventProfileBackups/ProfilesToRestore/`.
 - Start or restart the server
-- When the restore is complete the file will be moved to `user/profiles/EventProfileBackups/RestoredProfiles/`.
+- When the restore is complete the file will be moved to `SPT/user/profiles/EventProfileBackups/RestoredProfiles/`.
   - The number of restored backup files retained is set by the `MaximumRestoredBackupFiles` parameter in the config.jsonc.
 
 ## Configuration
-The configuration is found at `user/mods/eventautoprofilebackup/config/config.jsonc`
+The configuration is found at `SPT/user/mods/EventAutoProfileBackup/config.jsonc`
 
 Each event can be configurable in the following ways
 - Enable or disable
