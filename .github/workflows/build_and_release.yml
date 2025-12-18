@@ -1,4 +1,8 @@
-name: Build And Publish
+name: Build And Release
+
+permissions:
+  contents: write
+  packages: write
 
 on:
   workflow_dispatch:
@@ -7,7 +11,7 @@ on:
         description: 'Release Tag (e.g., v1.0.0)'
         required: true
       release_name:
-        description: 'Release Title (e.g., EventAutoProfileBackup 1.0.0)'
+        description: 'Release Title (e.g., EventAutoProfileBackup v1.0.0)'
         required: true
       build_type:
         type: choice
@@ -60,4 +64,4 @@ jobs:
           files: |
             ${{ inputs.release_name }}.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
