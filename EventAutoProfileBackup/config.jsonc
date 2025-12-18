@@ -13,7 +13,7 @@
     "MaximumRestoredDeleteLog": false,
     "MaximumRestoredFiles": 10,
 
-    "Directory": "./user/profiles/AutoProfileBackups",
+    "Directory": "./user/profiles/EventProfileBackups",
 
     // Which events should trigger a backup
     "AutoBackupEvents": [
