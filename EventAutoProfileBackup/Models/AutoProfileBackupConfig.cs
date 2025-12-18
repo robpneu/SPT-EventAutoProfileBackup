@@ -24,7 +24,7 @@ public record AutoProfileBackupConfig
     public int MaximumRestoredFiles { get; set; } = 10;
 
     [JsonPropertyName("Directory")]
-    public string Directory { get; set; } = "./user/profiles/AutoProfileBackups";
+    public string Directory { get; set; } = "./user/profiles/EventProfileBackups";
 
     [JsonPropertyName("AutoBackupEvents")]
     public AutoBackupEvent[] AutoBackupEvents { get; set; } = Array.Empty<AutoBackupEvent>();
