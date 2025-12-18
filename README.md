@@ -60,7 +60,9 @@ to make your code coherent for the other developers.
 
 ## History
 
-The mod was originally known as Lua-AutoProfileBackup. I rewrote most of it for SPT 3.10 and then entirely in migrating it to C# for SPT 4.0.
+The mod was originally known as Lua-AutoProfileBackup. Credit to Lua for the original concept. I rewrote most of the functionality for SPT 3.10 and then entirely in migrating it to C# for SPT 4.0.
+
+Note: This repo was originally forked from https://github.com/dvize/SPT-TypeScript. I deleted and recreated this repo to remove it as a fork when I completed the C# rewrite as the code is now all written by me. The git history has been maintained if you'd like to see its origins.
 
 Mod history:
 
@@ -68,7 +70,7 @@ SPT Version     | Author
 ----------      | ----------
 SPT 3.1.x-3.2.5 | Lua
 SPT 3.4-3.5     | Reis
-3.6-3.9         | Props
+3.6-3.9         | Props (https://forge.sp-tarkov.com/mod/848/luas-auto-profile-backup-updated)
 
 I also received some great help in the SPT discord from DrakiaXYZ, acidphantasm, and Jehree. Thank you!
 
