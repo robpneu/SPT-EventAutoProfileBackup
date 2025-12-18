@@ -1,0 +1,63 @@
+name: Build And Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release Tag (e.g., v1.0.0)'
+        required: true
+      release_name:
+        description: 'Release Title (e.g., EventAutoProfileBackup 1.0.0)'
+        required: true
+      build_type:
+        type: choice
+        description: The build configuration (e.g., Release)
+        required: true
+        options: 
+        - Release
+        - Debug
+      release_notes:
+        description: 'Release Notes (optional)'
+        required: false
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0
+
+      - name: Restore dependencies
+        run: dotnet restore EventAutoProfileBackup.sln
+
+      - name: Publish the project
+        run: dotnet publish EventAutoProfileBackup/EventAutoProfileBackup.csproj --configuration ${{ inputs.build_type }} --no-restore --output output/
+
+      - name: Copy files required for release into structure needed by SPT
+        run: |
+          mkdir -p SPT/user/mods/EventAutoProfileBackup
+          cp output/EventAutoProfileBackup.dll SPT/user/mods/EventAutoProfileBackup
+          cp output/EventAutoProfileBackup.pdb SPT/user/mods/EventAutoProfileBackup
+          cp output/config.jsonc SPT/user/mods/EventAutoProfileBackup
+          cp LICENSE.md SPT/user/mods/EventAutoProfileBackup
+
+      - name: Zip the build and loose files
+        run: zip -r "${{ inputs.release_name }}.zip" SPT/user/mods/EventAutoProfileBackup
+
+      - name: Create GitHub Release Draft
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          name: ${{ inputs.release_name }}
+          body: ${{ inputs.release_notes }}
+          draft: true
+          files: |
+            ${{ inputs.release_name }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}

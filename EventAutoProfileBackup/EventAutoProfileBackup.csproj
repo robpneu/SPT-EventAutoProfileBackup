@@ -41,4 +41,20 @@
     <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(ModsDirectoryPath)" ContinueOnError="false" />
     <Message Text="Files copied" />
   </Target>
+  
+  <!-- <Target Name="ZipReleaseOutput" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <ReleaseOutputDir>bin\Release\EventAutoProfileBackup\EventAutoProfileBackup\</ReleaseOutputDir>
+      <ZipFile>bin\Release\EventAutoProfileBackup.zip</ZipFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <ReleaseFilesToCopy Include="$(OutputPath)$(TargetName)$(TargetExt)" />
+      <ReleaseFilesToCopy Include="$(OutputPath)$(TargetName).pdb" />
+      <ReleaseFilesToCopy Include="$(OutputPath)config.jsonc" />
+    </ItemGroup>
+    <MakeDir Directories="$(ReleaseOutputDir)" />
+    <Copy SourceFiles="@(ReleaseFilesToCopy)" DestinationFolder="$(ReleaseOutputDir)" />
+    <Exec Command="powershell -Command &quot;Compress-Archive -Path '$(ReleaseOutputDir)*' -DestinationPath '$(ZipFile)' -Force&quot;" />
+    <RemoveDir Directories="bin\Release\EventAutoProfileBackup\EventAutoProfileBackup" />
+  </Target> -->
 </Project>
